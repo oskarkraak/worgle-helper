@@ -5,6 +5,21 @@ let trie = null;
 const langSelect = document.getElementById('lang-select');
 
 // Helper to manage language-specific blocked words
+const enPoints = {
+  a:1, b:3, c:3, d:2, e:1, f:4, g:2, h:4, i:1, j:8, k:5, l:1, m:3, n:1, o:1, p:3, q:1, r:1, s:1, t:1, u:1, v:4, w:4, x:8, y:4, z:10
+}; // unknown: q
+const dePoints = {
+  a:1, b:3, c:4, d:1, e:1, f:4, g:2, h:2, i:1, j:1, k:4, l:2, m:3, n:1, o:2, p:4, q:10, r:1, s:1, t:1, u:1, v:6, w:3, x:1, y:10, z:3, 'ä':6, 'ö':6, 'ü':6
+}; // unknown: j,x
+
+function getWordPoints(word, lang) {
+  const pointsMap = lang === 'en' ? enPoints : dePoints;
+  let total = 0;
+  for (const char of word) {
+    total += pointsMap[char] || 1;
+  }
+  return total;
+}
 function getRemovedWordsSet() {
     const lang = langSelect.value;
     const str = localStorage.getItem(`worgle-removed-words-${lang}`) || '[]';
@@ -148,25 +163,33 @@ document.getElementById('solve-btn').addEventListener('click', async () => {
     const countEl = document.getElementById('word-count');
     wordListEl.innerHTML = '';
     
-    // Sort words by length descending, then alphabetical
-    const sortedWords = Array.from(results.entries()).sort((a, b) => {
-        if (b[0].length !== a[0].length) {
-            return b[0].length - a[0].length;
-        }
-        return a[0].localeCompare(b[0]);
+    const lang = langSelect.value;
+    const wordsWithData = Array.from(results.entries()).map(([word, path]) => {
+        return { word, path, points: getWordPoints(word, lang) };
     });
     
-    countEl.innerText = sortedWords.length;
+    // Sort words by points descending, then length descending, then alphabetical
+    wordsWithData.sort((a, b) => {
+        if (b.points !== a.points) {
+            return b.points - a.points;
+        }
+        if (b.word.length !== a.word.length) {
+            return b.word.length - a.word.length;
+        }
+        return a.word.localeCompare(b.word);
+    });
     
-    if (sortedWords.length === 0) {
+    countEl.innerText = wordsWithData.length;
+    
+    if (wordsWithData.length === 0) {
         wordListEl.innerHTML = '<p class="no-words">No words found.</p>';
         return;
     }
     
-    sortedWords.forEach(([word, path]) => {
+    wordsWithData.forEach(({word, path, points}) => {
         const wordEl = document.createElement('div');
         wordEl.className = 'word-item';
-        wordEl.innerText = word;
+        wordEl.innerHTML = `<span>${word}</span> <span class="pts-badge">${points}</span>`;
         
         // Hover effects
         wordEl.addEventListener('mouseenter', () => {

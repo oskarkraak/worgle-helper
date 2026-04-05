@@ -273,6 +273,17 @@ h2 {
   box-shadow: 0 6px 12px rgba(59, 130, 246, 0.3);
 }
 
+.pts-badge {
+  background-color: var(--start-color);
+  color: white;
+  border-radius: 12px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.75rem;
+  margin-left: 0.3rem;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
 .no-words {
   color: var(--text-muted);
   font-style: italic;
