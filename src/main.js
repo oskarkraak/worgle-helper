@@ -22,6 +22,11 @@ for (let i = 0; i < 16; i++) {
       inputs[i + 1].focus();
     }
     input.classList.remove('highlight', 'path-start');
+    
+    // Auto-solve when grid is completely filled
+    if (inputs.every(inp => inp.value.trim() !== '')) {
+        document.getElementById('solve-btn').click();
+    }
   });
 
   input.addEventListener('focus', () => input.select());
