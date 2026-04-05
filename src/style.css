@@ -71,6 +71,27 @@ p {
   font-size: 1.1rem;
 }
 
+.lang-selector {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+}
+
+.lang-selector select {
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--grid-bg);
+  background-color: var(--surface-color);
+  color: var(--text-color);
+  font-weight: 600;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.lang-selector select:hover {
+  border-color: var(--primary-color);
+}
+
 .grid-section {
   display: flex;
   flex-direction: column;

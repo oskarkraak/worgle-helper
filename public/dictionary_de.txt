@@ -3583,7 +3583,6 @@ Adolf
 Adolfo
 Adolfs
 Adolph
-Adolphe
 Adonis
 adoptieren
 adoptiert
@@ -4053,7 +4052,6 @@ Ahaus
 Ahern
 ahistorisch
 Ahle
-Ahlen
 Ahlers
 Ahlmann
 Ahmad
@@ -4163,7 +4161,6 @@ Airborne
 Airbus
 Aircraft
 Airdaleterrier
-Aires
 Airline
 Airlines
 Airport
@@ -4719,7 +4716,6 @@ Alemannia
 alemannisch
 alemannische
 alemannischen
-Aleppo
 alert
 Alert
 Alesi
@@ -5321,7 +5317,6 @@ Almwiese
 Almwirtschaft
 Aloe
 Aloeextrakt
-Alone
 Alonso
 Aloys
 Alp
@@ -9674,7 +9669,6 @@ anzwinkern
 Äon
 Äonen
 Aorta
-Aosta
 ap
 Apache
 Apachen
@@ -11291,7 +11285,6 @@ arteriellen
 Arterien
 Arterienverkalkung
 Arteriosklerose
-Artes
 artesisch
 artfremd
 artgemäß
@@ -11602,7 +11595,6 @@ asozial
 Aspekt
 Aspekte
 Aspekten
-Aspen
 Aspern
 Asphalt
 Asphaltarbeit
@@ -14252,7 +14244,6 @@ Auktionskatalog
 Auktionslokal
 Aula
 Aule
-Aulus
 Aung
 Aura
 auratisch
@@ -19805,7 +19796,6 @@ Basenpaar
 Bases
 Bashir
 Basic
-Basics
 Basie
 basiere
 basieren
@@ -19817,7 +19807,6 @@ basierendes
 basiert
 basierte
 basierten
-Basil
 Basileios
 Basilica
 Basilika
@@ -19904,7 +19893,6 @@ Basra
 bass
 Bass
 Baß
-Bassa
 Bassajew
 Bassbariton
 Bassbuffo
@@ -19924,7 +19912,6 @@ Basslauf
 Basslinie
 Bassmann
 Bassnote
-Basso
 Basspartie
 Basssaite
 Basssaxofon
@@ -19933,8 +19920,6 @@ Bassstimme
 Basston
 Basstrommel
 Bast
-basta
-Basta
 Bastarbeit
 Bastard
 Bastdecke
@@ -28672,11 +28657,9 @@ Biowissenschaft
 Biozentrum
 Biphenyl
 bipolar
-Birch
 Bird
 Birdie
 Birdies
-Birds
 Birett
 Birger
 Birgit
@@ -29592,7 +29575,6 @@ Blitzturnier
 Blitzumfrage
 Blizzard
 bloc
-Bloch
 Blocher
 Blochin
 Block
@@ -31175,7 +31157,6 @@ Boßdorf
 Bosse
 Bosselei
 bosseln
-Bossi
 Bossmann
 Boston
 Bostoner
@@ -35171,7 +35152,6 @@ Büsche
 Büschel
 Büscheln
 büschelweise
-Buschen
 Büschen
 Buschenschank
 Buschenschänke
@@ -36353,7 +36333,6 @@ Cherubim
 Cheryl
 Chesapeake
 Cheshire
-Chess
 Chester
 Chesterkäse
 Chet
@@ -36547,7 +36526,6 @@ Choreograph
 Choreographie
 Choreographin
 Chorerfahrung
-Chores
 Chorfenster
 Chorfest
 Chorfestival
@@ -40077,7 +40055,6 @@ Depotstimmrecht
 Depotvolumen
 Depotwert
 Depp
-Deppen
 Deppendorf
 deppisch
 Depression
@@ -42047,7 +42024,6 @@ Diwan
 Diwandecke
 Diwankissen
 Dix
-Dixie
 Dixieland
 Dixon
 Diyarbakir
@@ -42442,7 +42418,6 @@ Doom
 Door
 Doors
 Dopamin
-dopen
 Doper
 Döpfner
 Doping
@@ -53400,7 +53375,6 @@ erbten
 Erbtochter
 Erbübel
 Erbvertrag
-Ercole
 Erdabrutsch
 Erdachse
 erdacht
@@ -56255,8 +56229,6 @@ eschatologisch
 Eschborn
 Eschborner
 Esche
-eschen
-Eschen
 Eschenbach
 Eschenbacher
 Eschenbaum
@@ -85229,7 +85201,6 @@ Halden
 Haldensleben
 Haldenstein
 Hale
-Halen
 Halensee
 Haley
 half
@@ -86758,8 +86729,6 @@ Hasler
 Häsler
 Haslinger
 Haspa
-Haspe
-Haspel
 Haspelkreuz
 haspeln
 Haspelspule
@@ -87476,7 +87445,6 @@ Hauruck
 Hauruckverfahren
 haus
 Haus
-Hausa
 Hausabbruch
 Hausabfall
 Hausabwässer
@@ -87871,7 +87839,6 @@ Häuslein
 Hausleiten
 Hausleiter
 Hausleitung
-Häusler
 Hausleute
 häuslich
 häusliche
@@ -89173,8 +89140,6 @@ Hektoliter
 Hektor
 Hel
 Helaba
-helau
-Helau
 Helbig
 Held
 Helden
@@ -112800,7 +112765,6 @@ Kopist
 Kopistin
 Köpke
 Kopp
-Koppe
 Koppel
 Köppel
 koppelgängig
@@ -112812,7 +112776,6 @@ Koppelriemen
 Koppelschloss
 Koppelung
 Koppelzeug
-koppen
 Kopper
 Köpper
 koppheister
@@ -120264,7 +120227,6 @@ Latium
 Latrine
 Latrinengerücht
 Latrinenparole
-Latsch
 Latsche
 latschen
 Latschen
@@ -123182,7 +123144,6 @@ Leykam
 Leyland
 Leyte
 Lezithin
-Lhasa
 Li
 Liaison
 Liam
@@ -124803,7 +124764,6 @@ Lockung
 Lockvogel
 Lockwelle
 locus
-Loden
 Lodenanzug
 Lodenhut
 Lodenjoppe
@@ -153592,8 +153552,6 @@ Post
 Postabonnement
 Postadresse
 Postagentur
-postal
-Postal
 postalisch
 Postament
 Postamt
@@ -171302,8 +171260,6 @@ Scheindebatte
 Scheindemokratie
 Scheinding
 Scheindiskussion
-scheine
-Scheine
 Scheinehe
 scheinen
 Scheinen
@@ -172249,7 +172205,6 @@ Schinkenkloppen
 Schinkensemmel
 Schinkenspeck
 Schinkenstulle
-Schinne
 schinnig
 Schiphol
 Schippchen
@@ -179335,8 +179290,6 @@ selbander
 selbdritt
 selbe
 selben
-selber
-Selber
 Selbermachen
 selbig
 selbige
@@ -197433,7 +197386,6 @@ Tarock
 Tarockkarte
 Tarot
 Tarsus
-Tartan
 Tartanbahn
 Tartu
 Tarzan
@@ -197545,7 +197497,6 @@ Tatablauf
 Tatami
 Tatar
 Tatarbeefsteak
-Tatare
 Tataren
 tatarisch
 tatarischen
@@ -199192,7 +199143,6 @@ Terrorwarnung
 Terrorwelle
 Terrorzelle
 Terry
-Tertia
 Tertianer
 tertiär
 Tertiär
@@ -200667,7 +200617,6 @@ Tips
 Tipse
 Tirade
 Tiraden
-Tirana
 tirili
 tirilieren
 Tirol

@@ -2,8 +2,26 @@ import './style.css';
 import { Trie, solveWorgle } from './solver.js';
 
 let trie = null;
-const removedWordsStr = localStorage.getItem('worgle-removed-words') || '[]';
-const removedWords = new Set(JSON.parse(removedWordsStr));
+const langSelect = document.getElementById('lang-select');
+
+// Helper to manage language-specific blocked words
+function getRemovedWordsSet() {
+    const lang = langSelect.value;
+    const str = localStorage.getItem(`worgle-removed-words-${lang}`) || '[]';
+    return new Set(JSON.parse(str));
+}
+
+function saveRemovedWord(word) {
+    const lang = langSelect.value;
+    const set = getRemovedWordsSet();
+    set.add(word);
+    localStorage.setItem(`worgle-removed-words-${lang}`, JSON.stringify([...set]));
+}
+
+langSelect.addEventListener('change', () => {
+    trie = null;
+    document.getElementById('solve-btn').click();
+});
 
 // Initialize grid UI
 const gridContainer = document.getElementById('worgle-grid');
@@ -73,7 +91,8 @@ async function loadDictionary() {
   const loading = document.getElementById('loading');
   loading.classList.remove('hidden');
   try {
-    const response = await fetch('/dictionary.txt');
+    const lang = langSelect.value;
+    const response = await fetch(`/dictionary_${lang}.txt`);
     if (!response.ok) throw new Error("Could not load dictionary");
     const text = await response.text();
     const words = text.split(/\r?\n/);
@@ -116,6 +135,7 @@ document.getElementById('solve-btn').addEventListener('click', async () => {
     // 3 char minimum length
     const rawResults = solveWorgle(gridState, trie, 3);
     
+    const removedWords = getRemovedWordsSet();
     const results = new Map();
     for (const [word, path] of rawResults.entries()) {
         if (!removedWords.has(word)) {
@@ -162,8 +182,7 @@ document.getElementById('solve-btn').addEventListener('click', async () => {
         });
         
         wordEl.addEventListener('click', async () => {
-            removedWords.add(word);
-            localStorage.setItem('worgle-removed-words', JSON.stringify([...removedWords]));
+            saveRemovedWord(word);
             wordEl.remove();
             countEl.innerText = parseInt(countEl.innerText) - 1;
             inputs.forEach(inp => inp.classList.remove('highlight', 'path-start'));
@@ -173,7 +192,7 @@ document.getElementById('solve-btn').addEventListener('click', async () => {
                 await fetch('/api/remove-word', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ word })
+                    body: JSON.stringify({ word, lang: langSelect.value })
                 });
             } catch (e) {
                 console.error("Could not remove word from file:", e);

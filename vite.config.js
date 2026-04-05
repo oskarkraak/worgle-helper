@@ -15,13 +15,14 @@ export default defineConfig({
             });
             req.on('end', () => {
               try {
-                const { word } = JSON.parse(body);
+                const { word, lang } = JSON.parse(body);
                 if (!word) {
                     res.statusCode = 400;
                     return res.end(JSON.stringify({ error: "No word provided" }));
                 }
 
-                const dictPath = path.resolve(process.cwd(), 'public/dictionary.txt');
+                const dictName = lang === 'en' ? 'dictionary_en.txt' : 'dictionary_de.txt';
+                const dictPath = path.resolve(process.cwd(), `public/${dictName}`);
                 if (fs.existsSync(dictPath)) {
                   let dict = fs.readFileSync(dictPath, 'utf-8');
                   const words = dict.split(/\r?\n/);
@@ -31,12 +32,12 @@ export default defineConfig({
                   // Only write if changed to save I/O
                   if (words.length !== filtered.length) {
                       fs.writeFileSync(dictPath, filtered.join('\n'), 'utf-8');
-                      console.log(`[Plugin] Permanently removed "${word}" from dictionary.txt`);
+                      console.log(`[Plugin] Permanently removed "${word}" from ${dictName}`);
                   } else {
-                      console.log(`[Plugin] Word "${word}" was not found in dictionary.txt to remove.`);
+                      console.log(`[Plugin] Word "${word}" was not found in ${dictName} to remove.`);
                   }
                 } else {
-                    console.error("[Plugin] dictionary.txt not found at", dictPath);
+                    console.error(`[Plugin] ${dictName} not found at`, dictPath);
                 }
                 
                 res.setHeader('Content-Type', 'application/json');
