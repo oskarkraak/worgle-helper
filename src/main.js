@@ -12,13 +12,18 @@ const dePoints = {
   a:1, b:3, c:4, d:1, e:1, f:4, g:2, h:2, i:1, j:1, k:4, l:2, m:3, n:1, o:2, p:4, q:10, r:1, s:1, t:1, u:1, v:6, w:3, x:1, y:10, z:3, 'ä':6, 'ö':6, 'ü':6
 }; // unknown: j,x
 
-function getWordPoints(word, lang) {
+function getWordPoints(word, lang, path, inputs) {
   const pointsMap = lang === 'en' ? enPoints : dePoints;
   let total = 0;
   for (const char of word) {
     total += pointsMap[char] || 1;
   }
-  return total;
+  let maxMult = 1;
+  for (const idx of path) {
+    const m = parseInt(inputs[idx].dataset.multiplier || "1");
+    if (m > maxMult) maxMult = m;
+  }
+  return total * maxMult;
 }
 function getRemovedWordsSet() {
     const lang = langSelect.value;
@@ -48,6 +53,7 @@ for (let i = 0; i < 16; i++) {
   input.maxLength = 2; // Allow 2 chars for edge cases like 'qu', typical worgle is 1 though
   input.classList.add('grid-cell');
   input.dataset.index = i;
+  input.dataset.multiplier = "1";
   
   // Auto-move focus on type
   input.addEventListener('input', (e) => {
@@ -80,6 +86,15 @@ for (let i = 0; i < 16; i++) {
     if (e.key === 'Backspace' && input.value === '') {
         if (i > 0) inputs[i - 1].focus();
     }
+    if (e.key === 'Enter') {
+        let current = parseInt(input.dataset.multiplier || "1");
+        current = current >= 3 ? 1 : current + 1;
+        input.dataset.multiplier = current;
+        if (inputs.every(inp => inp.value.trim() !== '')) {
+            document.getElementById('solve-btn').click();
+        }
+        e.preventDefault();
+    }
   });
   
   gridContainer.appendChild(input);
@@ -93,6 +108,7 @@ setTimeout(() => inputs[0].focus(), 100);
 document.getElementById('clear-btn').addEventListener('click', () => {
   inputs.forEach(input => {
     input.value = '';
+    input.dataset.multiplier = "1";
     input.classList.remove('highlight', 'path-start');
   });
   inputs[0].focus();
@@ -165,7 +181,7 @@ document.getElementById('solve-btn').addEventListener('click', async () => {
     
     const lang = langSelect.value;
     const wordsWithData = Array.from(results.entries()).map(([word, path]) => {
-        return { word, path, points: getWordPoints(word, lang) };
+        return { word, path, points: getWordPoints(word, lang, path, inputs) };
     });
     
     // Sort words by points descending, then length descending, then alphabetical
