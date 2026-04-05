@@ -30,23 +30,31 @@ body {
 #app {
   max-width: 900px;
   width: 100%;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3rem;
+  display: flex;
+  flex-direction: column;
   margin-top: 2rem;
 }
 
+main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  width: 100%;
+}
+
 @media (max-width: 768px) {
-  #app {
+  main {
     grid-template-columns: 1fr;
-    gap: 2rem; margin-top: 0;
+    gap: 2rem;
+  }
+  #app {
+    margin-top: 0;
   }
 }
 
 header {
-  grid-column: 1 / -1;
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 h1 {
