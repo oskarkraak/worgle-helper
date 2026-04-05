@@ -2,6 +2,8 @@ import './style.css';
 import { Trie, solveWorgle } from './solver.js';
 
 let trie = null;
+const removedWordsStr = localStorage.getItem('worgle-removed-words') || '[]';
+const removedWords = new Set(JSON.parse(removedWordsStr));
 
 // Initialize grid UI
 const gridContainer = document.getElementById('worgle-grid');
@@ -107,7 +109,14 @@ document.getElementById('solve-btn').addEventListener('click', async () => {
     }
     
     // 3 char minimum length
-    const results = solveWorgle(gridState, trie, 3);
+    const rawResults = solveWorgle(gridState, trie, 3);
+    
+    const results = new Map();
+    for (const [word, path] of rawResults.entries()) {
+        if (!removedWords.has(word)) {
+            results.set(word, path);
+        }
+    }
     
     // Render results
     const wordListEl = document.getElementById('word-list');
@@ -145,6 +154,25 @@ document.getElementById('solve-btn').addEventListener('click', async () => {
         
         wordEl.addEventListener('mouseleave', () => {
             inputs.forEach(inp => inp.classList.remove('highlight', 'path-start'));
+        });
+        
+        wordEl.addEventListener('click', async () => {
+            removedWords.add(word);
+            localStorage.setItem('worgle-removed-words', JSON.stringify([...removedWords]));
+            wordEl.remove();
+            countEl.innerText = parseInt(countEl.innerText) - 1;
+            inputs.forEach(inp => inp.classList.remove('highlight', 'path-start'));
+            
+            // Permanently remove from file via Vite backend
+            try {
+                await fetch('/api/remove-word', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ word })
+                });
+            } catch (e) {
+                console.error("Could not remove word from file:", e);
+            }
         });
         
         wordListEl.appendChild(wordEl);
