@@ -56,17 +56,24 @@ function toCornerPoint(value) {
 }
 
 function normalizeTileText(raw) {
-  const s = String(raw ?? "")
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "");
+  // Preserve case from OCR so we can distinguish "l" vs "L".
+  const s = String(raw ?? "").trim().replace(/\s+/g, "");
 
-  // Keep letters incl. umlauts.
-  const cleaned = s.replace(/[^a-zäöüß]/g, "");
+  // Keep letters incl. umlauts in both cases.
+  const cleaned = s.replace(/[^a-zA-ZäöüßÄÖÜ]/g, "");
   if (!cleaned) return "";
 
-  // If OCR returns multiple letters, only keep the first.
-  return cleaned.slice(0, 1);
+  // Only keep the first OCR character.
+  const ch = cleaned[0];
+
+  // Case-aware fix for common confusion:
+  // - lowercase "l" is often actually uppercase "I" in the UI -> treat as "i"
+  // - uppercase "L" should remain an actual "l"
+  if (ch === "l") return "i";
+  if (ch === "I") return "i";
+  if (ch === "L") return "l";
+
+  return ch.toLowerCase();
 }
 
 function parseLanguage(lang) {
