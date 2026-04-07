@@ -61,13 +61,12 @@ function normalizeTileText(raw) {
     .trim()
     .replace(/\s+/g, "");
 
-  // Keep letters incl. umlauts. Allow 2 chars (e.g. "qu").
+  // Keep letters incl. umlauts.
   const cleaned = s.replace(/[^a-zäöüß]/g, "");
   if (!cleaned) return "";
 
-  // Prefer "qu" if present; otherwise just take first 1-2 chars.
-  if (cleaned.startsWith("qu")) return "qu";
-  return cleaned.slice(0, 2);
+  // If OCR returns multiple letters, only keep the first.
+  return cleaned.slice(0, 1);
 }
 
 function parseLanguage(lang) {
