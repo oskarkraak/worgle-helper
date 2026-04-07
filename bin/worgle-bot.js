@@ -288,7 +288,7 @@ async function main() {
         language: "de",
         model: "FAST",
       },
-      timing: config?.timing ?? { betweenWordsMs: 80, betweenTilesMs: 15 },
+      timing: config?.timing ?? { betweenWordsMs: 150, betweenTilesMs: 80 },
     };
     fs.writeFileSync(configPath, JSON.stringify(out, null, 2), "utf8");
     console.log(`Saved calibration to ${argv.config}`);
@@ -357,8 +357,8 @@ async function main() {
       return;
     }
 
-    const betweenWordsMs = Number(config?.timing?.betweenWordsMs ?? 80);
-    const betweenTilesMs = Number(config?.timing?.betweenTilesMs ?? 15);
+    const betweenWordsMs = Number(config?.timing?.betweenWordsMs ?? 150);
+    const betweenTilesMs = Number(config?.timing?.betweenTilesMs ?? 80);
 
     console.log("Focus the game window now. Press Enter to start dragging words.");
     await promptEnter(rl, "");
@@ -367,6 +367,7 @@ async function main() {
       await checkFailSafeCorner(requestStop);
       if (stopRequested) throw new Error("Stopped by user");
       try {
+        console.log(`Trying: ${word} (${p.join("-")})`);
         await dragPath(tileCenters, p, betweenTilesMs);
         if (betweenWordsMs > 0) await sleep(betweenWordsMs);
       } catch (e) {

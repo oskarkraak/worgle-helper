@@ -12,8 +12,8 @@
     "model": "FAST"
   },
   "timing": {
-    "betweenWordsMs": 80,
-    "betweenTilesMs": 40
+    "betweenWordsMs": 150,
+    "betweenTilesMs": 80
   }
 }
 
