@@ -13,7 +13,8 @@
   },
   "timing": {
     "betweenWordsMs": 150,
-    "betweenTilesMs": 80
+    "betweenTilesMs": 80,
+    "settleOnWordStartMs": 50
   }
 }
 

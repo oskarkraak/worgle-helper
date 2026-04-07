@@ -179,10 +179,11 @@ async function loadDictionary(dictPath) {
   return trie;
 }
 
-async function dragPath(tileCenters, pathIdxs, betweenTilesMs) {
+async function dragPath(tileCenters, pathIdxs, betweenTilesMs, settleOnStartMs = 0) {
   if (!pathIdxs || pathIdxs.length === 0) return;
   const first = tileCenters[pathIdxs[0]];
   await mouse.move(straightTo(new Point(first.x, first.y)));
+  if (settleOnStartMs > 0) await sleep(settleOnStartMs);
   await mouse.pressButton(Button.LEFT);
   try {
     for (let i = 1; i < pathIdxs.length; i++) {
@@ -294,7 +295,7 @@ async function main() {
         language: "de",
         model: "FAST",
       },
-      timing: config?.timing ?? { betweenWordsMs: 150, betweenTilesMs: 80 },
+      timing: config?.timing ?? { betweenWordsMs: 150, betweenTilesMs: 80, settleOnWordStartMs: 50 },
     };
     fs.writeFileSync(configPath, JSON.stringify(out, null, 2), "utf8");
     console.log(`Saved calibration to ${argv.config}`);
@@ -365,6 +366,7 @@ async function main() {
 
     const betweenWordsMs = Number(config?.timing?.betweenWordsMs ?? 150);
     const betweenTilesMs = Number(config?.timing?.betweenTilesMs ?? 80);
+    const settleOnWordStartMs = Number(config?.timing?.settleOnWordStartMs ?? 50);
 
     console.log("Focus the game window now. Press Enter to start dragging words.");
     await promptEnter(rl, "");
@@ -374,7 +376,7 @@ async function main() {
       if (stopRequested) throw new Error("Stopped by user");
       try {
         console.log(`Trying: ${word} (${p.join("-")})`);
-        await dragPath(tileCenters, p, betweenTilesMs);
+        await dragPath(tileCenters, p, betweenTilesMs, settleOnWordStartMs);
         if (betweenWordsMs > 0) await sleep(betweenWordsMs);
       } catch (e) {
         console.error(`Failed on word "${word}":`, e?.message ?? e);

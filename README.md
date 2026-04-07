@@ -56,5 +56,6 @@ The first run will ask you to move your mouse to each corner tile center (top-le
 npm run bot --
 ```
 
-If the game sometimes misses tiles during dragging, increase `timing.betweenTilesMs` in `worgle-bot.config.json` (e.g. 40–80ms).
+If the game sometimes misses tiles during dragging, increase `timing.betweenTilesMs` in `worgle-bot.config.json` (e.g. 40–120ms).
+If the game occasionally misses the **first** tile of a word, increase `timing.settleOnWordStartMs` (e.g. 30–100ms).
 
