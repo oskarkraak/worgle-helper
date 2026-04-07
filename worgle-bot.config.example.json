@@ -11,6 +11,12 @@
     "language": "de",
     "model": "FAST"
   },
+  "round": {
+    "orangeIndicator": null,
+    "tolerance": 35,
+    "pollMs": 200,
+    "streak": 5
+  },
   "timing": {
     "betweenWordsMs": 150,
     "betweenTilesMs": 80,

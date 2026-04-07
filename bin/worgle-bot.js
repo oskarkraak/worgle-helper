@@ -55,6 +55,27 @@ function toCornerPoint(value) {
   return { x, y };
 }
 
+function toRgb(value) {
+  if (!value || typeof value !== "object") return null;
+  const r = Number(value.r);
+  const g = Number(value.g);
+  const b = Number(value.b);
+  if (![r, g, b].every(Number.isFinite)) return null;
+  return { r, g, b };
+}
+
+function colorDistanceRgb(a, b) {
+  const dr = a.r - b.r;
+  const dg = a.g - b.g;
+  const db = a.b - b.b;
+  return Math.sqrt(dr * dr + dg * dg + db * db);
+}
+
+async function sampleRgbAt(point) {
+  const c = await screen.colorAt(new Point(point.x, point.y));
+  return { r: Number(c.R), g: Number(c.G), b: Number(c.B) };
+}
+
 function normalizeTileText(raw) {
   // Preserve case from OCR so we can distinguish "l" vs "L".
   const s = String(raw ?? "").trim().replace(/\s+/g, "");
@@ -90,6 +111,66 @@ function parseModel(model) {
 
 async function promptEnter(rl, message) {
   return new Promise((resolve) => rl.question(message, () => resolve()));
+}
+
+async function calibrateOrangeIndicatorInteractively(rl) {
+  await promptEnter(
+    rl,
+    "Orange indicator: move mouse over an ORANGE pixel near the score and press Enter... "
+  );
+  const pos = await mouse.getPosition();
+  const point = { x: Math.round(pos.x), y: Math.round(pos.y) };
+  const rgb = await sampleRgbAt(point);
+  console.log(`  -> orangeIndicator.point: (${point.x}, ${point.y})`);
+  console.log(`  -> orangeIndicator.rgb: (${rgb.r}, ${rgb.g}, ${rgb.b})`);
+  return { point, rgb };
+}
+
+async function isOrangeIndicatorActive(indicator, tolerance) {
+  if (!indicator?.point || !indicator?.rgb) return false;
+  const current = await sampleRgbAt(indicator.point);
+  return colorDistanceRgb(current, indicator.rgb) <= tolerance;
+}
+
+function startOrangeIndicatorMonitor({ indicator, tolerance, pollMs, streak, shouldStop }) {
+  // Polls independently of play loop and flips "confirmedActive" only after a streak.
+  // The play loop can read getConfirmedActive() without ever waiting.
+  let stopped = false;
+  let confirmedActive = null; // null until first confirmation
+  let activeStreak = 0;
+  let inactiveStreak = 0;
+
+  const loop = async () => {
+    while (!stopped) {
+      if (shouldStop?.()) return;
+      try {
+        const active = await isOrangeIndicatorActive(indicator, tolerance);
+        if (active) {
+          activeStreak++;
+          inactiveStreak = 0;
+          if (activeStreak >= streak) confirmedActive = true;
+        } else {
+          inactiveStreak++;
+          activeStreak = 0;
+          if (inactiveStreak >= streak) confirmedActive = false;
+        }
+      } catch {
+        // Ignore transient read errors; keep last confirmed state.
+      }
+      await sleep(pollMs);
+    }
+  };
+
+  void loop();
+
+  return {
+    stop() {
+      stopped = true;
+    },
+    getConfirmedActive() {
+      return confirmedActive;
+    },
+  };
 }
 
 async function calibrateCornersInteractively(rl) {
@@ -279,6 +360,11 @@ async function main() {
   const missingCorner =
     !corners.topLeft || !corners.topRight || !corners.bottomLeft || !corners.bottomRight;
 
+  // Round indicator (orange pixel near score)
+  const roundOrangePoint = toCornerPoint(config?.round?.orangeIndicator?.point);
+  const roundOrangeRgb = toRgb(config?.round?.orangeIndicator?.rgb);
+  const hasRoundIndicator = !!(roundOrangePoint && roundOrangeRgb);
+
   if (missingCorner) {
     console.log(`No (valid) corners found in ${argv.config}. Starting calibration...`);
     const calibrated = await calibrateCornersInteractively(rl);
@@ -295,10 +381,34 @@ async function main() {
         language: "de",
         model: "FAST",
       },
+      round: config?.round ?? { orangeIndicator: null, tolerance: 35, pollMs: 200 },
       timing: config?.timing ?? { betweenWordsMs: 150, betweenTilesMs: 80, settleOnWordStartMs: 50 },
     };
     fs.writeFileSync(configPath, JSON.stringify(out, null, 2), "utf8");
     console.log(`Saved calibration to ${argv.config}`);
+
+    // Keep in-memory config in sync for this run
+    config = out;
+  }
+
+  // If not configured yet, offer to calibrate the round indicator now (only relevant for non-dry runs).
+  if (!argv.dryRun && !hasRoundIndicator) {
+    console.log(`No orange round indicator found in ${argv.config}. Calibrating...`);
+    const orangeIndicator = await calibrateOrangeIndicatorInteractively(rl);
+    const nextConfig = {
+      ...(config ?? { version: 1 }),
+      corners: config?.corners ?? corners,
+      ocr: config?.ocr ?? { dataPath: "./ocr-data", language: "de", model: "FAST" },
+      round: {
+        orangeIndicator,
+        tolerance: Number(config?.round?.tolerance ?? 35),
+        pollMs: Number(config?.round?.pollMs ?? 200),
+      },
+      timing: config?.timing ?? { betweenWordsMs: 150, betweenTilesMs: 80, settleOnWordStartMs: 50 },
+    };
+    fs.writeFileSync(configPath, JSON.stringify(nextConfig, null, 2), "utf8");
+    console.log(`Saved round indicator to ${argv.config}`);
+    config = nextConfig;
   }
 
   const ocrDataPath = String(config?.ocr?.dataPath ?? "./ocr-data");
@@ -320,67 +430,120 @@ async function main() {
     const tileCenters = computeTileCenters(corners);
     const regionSize = estimateTileRegionSize(corners);
 
-    console.log("Reading tiles via OCR...");
-    console.log("Press Ctrl+C (or 'q') to stop. Or use the failsafe corner.");
-    const grid = [];
-    for (let i = 0; i < 16; i++) {
-      await checkFailSafeCorner(requestStop);
-      if (stopRequested) throw new Error("Stopped by user");
-      const text = await readTileWithOcr(worker, tileCenters[i], regionSize, ocrLang);
-      grid.push(text);
-      process.stdout.write(`  tile ${i + 1}/16: ${text || "·"}\n`);
-    }
-
-    console.log("Grid:");
-    for (let r = 0; r < 4; r++) {
-      console.log(
-        grid
-          .slice(r * 4, r * 4 + 4)
-          .map((s) => (s || "·").padEnd(2, " "))
-          .join(" ")
-      );
-    }
-
-    console.log("Loading dictionary & solving...");
-    if (!fs.existsSync(dictPath)) {
-      throw new Error(
-        `German dictionary not found at ${dictPath}. Add a dictionary file there (one word per line).`
-      );
-    }
-    const trie = await loadDictionary(dictPath);
-    const results = solveWorgle(grid, trie, argv.minLength);
-
-    let words = Array.from(results.entries()).map(([word, path]) => ({ word, path }));
-    if (argv.sort === "length") {
-      words.sort((a, b) => b.word.length - a.word.length || a.word.localeCompare(b.word));
-    } else {
-      words.sort((a, b) => a.word.localeCompare(b.word));
-    }
-    if (argv.limit > 0) words = words.slice(0, argv.limit);
-
-    console.log(`Found ${results.size} words. Trying ${words.length}...`);
-    if (argv.dryRun) {
-      console.log("(dryRun enabled: not dragging)");
-      return;
-    }
-
     const betweenWordsMs = Number(config?.timing?.betweenWordsMs ?? 150);
     const betweenTilesMs = Number(config?.timing?.betweenTilesMs ?? 80);
     const settleOnWordStartMs = Number(config?.timing?.settleOnWordStartMs ?? 50);
 
-    console.log("Focus the game window now. Press Enter to start dragging words.");
-    await promptEnter(rl, "");
+    const roundTolerance = Number(config?.round?.tolerance ?? 35);
+    const roundPollMs = Number(config?.round?.pollMs ?? 200);
+    const roundStreak = Number(config?.round?.streak ?? 5);
+    const roundIndicator = config?.round?.orangeIndicator
+      ? { point: toCornerPoint(config.round.orangeIndicator.point), rgb: toRgb(config.round.orangeIndicator.rgb) }
+      : null;
 
-    for (const { word, path: p } of words) {
-      await checkFailSafeCorner(requestStop);
-      if (stopRequested) throw new Error("Stopped by user");
-      try {
-        console.log(`Trying: ${word} (${p.join("-")})`);
-        await dragPath(tileCenters, p, betweenTilesMs, settleOnWordStartMs);
-        if (betweenWordsMs > 0) await sleep(betweenWordsMs);
-      } catch (e) {
-        console.error(`Failed on word "${word}":`, e?.message ?? e);
+    let roundMonitor = null;
+    const playOneRound = async () => {
+      console.log("Reading tiles via OCR...");
+      console.log("Press Ctrl+C (or 'q') to stop. Or use the failsafe corner.");
+      const grid = [];
+      for (let i = 0; i < 16; i++) {
+        await checkFailSafeCorner(requestStop);
+        if (stopRequested) throw new Error("Stopped by user");
+        const text = await readTileWithOcr(worker, tileCenters[i], regionSize, ocrLang);
+        grid.push(text);
+        process.stdout.write(`  tile ${i + 1}/16: ${text || "·"}\n`);
       }
+
+      console.log("Grid:");
+      for (let r = 0; r < 4; r++) {
+        console.log(
+          grid
+            .slice(r * 4, r * 4 + 4)
+            .map((s) => (s || "·").padEnd(2, " "))
+            .join(" ")
+        );
+      }
+
+      console.log("Loading dictionary & solving...");
+      if (!fs.existsSync(dictPath)) {
+        throw new Error(
+          `German dictionary not found at ${dictPath}. Add a dictionary file there (one word per line).`
+        );
+      }
+      const trie = await loadDictionary(dictPath);
+      const results = solveWorgle(grid, trie, argv.minLength);
+
+      let words = Array.from(results.entries()).map(([word, path]) => ({ word, path }));
+      if (argv.sort === "length") {
+        words.sort((a, b) => b.word.length - a.word.length || a.word.localeCompare(b.word));
+      } else {
+        words.sort((a, b) => a.word.localeCompare(b.word));
+      }
+      if (argv.limit > 0) words = words.slice(0, argv.limit);
+
+      console.log(`Found ${results.size} words. Trying ${words.length}...`);
+      if (argv.dryRun) {
+        console.log("(dryRun enabled: not dragging)");
+        return;
+      }
+
+      for (const { word, path: p } of words) {
+        await checkFailSafeCorner(requestStop);
+        if (stopRequested) throw new Error("Stopped by user");
+
+        if (roundIndicator?.point && roundIndicator?.rgb) {
+          const active = roundMonitor?.getConfirmedActive();
+          if (active === false) {
+            console.log("Round ended (orange indicator changed). Stopping this round.");
+            return;
+          }
+        }
+
+        try {
+          console.log(`Trying: ${word} (${p.join("-")})`);
+          await dragPath(tileCenters, p, betweenTilesMs, settleOnWordStartMs);
+          if (betweenWordsMs > 0) await sleep(betweenWordsMs);
+        } catch (e) {
+          console.error(`Failed on word \"${word}\":`, e?.message ?? e);
+        }
+      }
+    };
+
+    if (argv.dryRun || !roundIndicator?.point || !roundIndicator?.rgb) {
+      await playOneRound();
+      return;
+    }
+
+    console.log("Round auto-detect enabled.");
+    roundMonitor = startOrangeIndicatorMonitor({
+      indicator: roundIndicator,
+      tolerance: roundTolerance,
+      pollMs: roundPollMs,
+      streak: roundStreak,
+      shouldStop: () => stopRequested,
+    });
+
+    try {
+      console.log("Waiting for round to start (orange indicator matches)...");
+      while (roundMonitor.getConfirmedActive() !== true) {
+        await checkFailSafeCorner(requestStop);
+        if (stopRequested) throw new Error("Stopped by user");
+        await sleep(roundPollMs);
+      }
+      console.log("Round started. Playing...");
+
+      while (true) {
+        await playOneRound();
+        console.log("Waiting for next round...");
+        while (roundMonitor.getConfirmedActive() !== true) {
+          await checkFailSafeCorner(requestStop);
+          if (stopRequested) throw new Error("Stopped by user");
+          await sleep(roundPollMs);
+        }
+        console.log("New round detected. Playing...");
+      }
+    } finally {
+      roundMonitor.stop();
     }
   } finally {
     try {

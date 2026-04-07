@@ -26,5 +26,20 @@
   "timing": {
     "betweenWordsMs": 80,
     "betweenTilesMs": 15
+  },
+  "round": {
+    "orangeIndicator": {
+      "point": {
+        "x": 767,
+        "y": 47
+      },
+      "rgb": {
+        "r": 255,
+        "g": 171,
+        "b": 64
+      }
+    },
+    "tolerance": 35,
+    "pollMs": 200
   }
 }

@@ -59,3 +59,13 @@ npm run bot --
 If the game sometimes misses tiles during dragging, increase `timing.betweenTilesMs` in `worgle-bot.config.json` (e.g. 40–120ms).
 If the game occasionally misses the **first** tile of a word, increase `timing.settleOnWordStartMs` (e.g. 30–100ms).
 
+### Auto-detect round start/end (orange score indicator)
+
+If you configure an orange pixel near the score display, the bot can automatically:
+
+- stop when the round ends (orange pixel changes)
+- wait for the next round to start
+- re-read the new board and start playing again
+
+On the first non-`--dryRun` run, the bot will prompt you to move the mouse over an **orange pixel** near the score and press Enter, then it stores the point and its sampled RGB in `worgle-bot.config.json` under `round.orangeIndicator`.
+
