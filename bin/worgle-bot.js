@@ -324,6 +324,25 @@ async function main() {
     if (reason) console.log(`\nStopping (${reason})...`);
   };
 
+  // Global "q" quit (works even when terminal isn't focused)
+  // Best-effort: if hook can't start (permissions/AV), we keep other stop methods.
+  let uiohook = null;
+  try {
+    const mod = await import("uiohook-napi");
+    uiohook = mod.uIOhook ?? mod.default?.uIOhook ?? mod.default ?? null;
+    const keycodes = mod.UiohookKeycode ?? mod.default?.UiohookKeycode ?? null;
+    const VC_Q = keycodes?.VC_Q ?? 16; // libuiohook uses VC_Q = 16
+    if (uiohook?.on && uiohook?.start) {
+      uiohook.on("keydown", (e) => {
+        if (e?.keycode === VC_Q) requestStop("global q");
+      });
+      uiohook.start();
+      console.log("Global quit enabled: press Q to stop (works without terminal focus).");
+    }
+  } catch {
+    // ignore
+  }
+
   // Ctrl+C handling
   const sigintHandler = () => requestStop("Ctrl+C");
   process.on("SIGINT", sigintHandler);
@@ -548,6 +567,9 @@ async function main() {
   } finally {
     try {
       if (worker) await worker.terminate();
+    } catch {}
+    try {
+      if (uiohook?.stop) uiohook.stop();
     } catch {}
     try {
       process.off("SIGINT", sigintHandler);
