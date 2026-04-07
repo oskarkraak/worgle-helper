@@ -4,11 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "bot": "node ./bin/worgle-bot.js",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
     "vite": "^8.0.1"
+  },
+  "dependencies": {
+    "@nut-tree-fork/nut-js": "^4.2.6",
+    "tesseract.js": "^6.0.1",
+    "yargs": "^18.0.0"
   }
 }

@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "corners": {
+    "topLeft": {
+      "x": 606,
+      "y": 433
+    },
+    "topRight": {
+      "x": 926,
+      "y": 433
+    },
+    "bottomLeft": {
+      "x": 602,
+      "y": 757
+    },
+    "bottomRight": {
+      "x": 930,
+      "y": 753
+    }
+  },
+  "ocr": {
+    "dataPath": "./ocr-data",
+    "language": "de",
+    "model": "FAST"
+  },
+  "timing": {
+    "betweenWordsMs": 80,
+    "betweenTilesMs": 15
+  }
+}
